@@ -1,6 +1,17 @@
-## Collaboration Questions:
+## Team Collaboration Document
 
-   * How will you tackle the homework?  
-   * Branches off main? Who reviews pull requests?
-   * Will you meet physically or virtually? 
-   * How do you communicate? Team chat on Slack?  
+# How will we tackle the homework? 
+
+tessa 
+
+# Branches off main? Who reviews pull requests? 
+
+kali
+
+# Will you meet phycially or virtually> 
+
+tessa
+
+# How do you communicate? Team chat on Slack? 
+
+kali 
