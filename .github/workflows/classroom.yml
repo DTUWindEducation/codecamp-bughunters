@@ -1,0 +1,27 @@
+name: Autograding Tests
+'on':
+- workflow_dispatch
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: CodeCamp Tests
+      id: codecamp-tests
+      uses: classroom-resources/autograding-python-grader@v1
+      with:
+        timeout: 2
+        setup-command: ''
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        CODECAMP-TESTS_RESULTS: "${{steps.codecamp-tests.outputs.result}}"
+      with:
+        runners: codecamp-tests
