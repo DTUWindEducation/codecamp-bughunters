@@ -2,7 +2,7 @@
 
 # How will we tackle the homework? 
 
-tessa 
+We will meet everyweek after class, to discuss week per week how we will work. We will divide tasks, work on it by ourselves and then review each others work 
 
 # Branches off main? Who reviews pull requests? 
 
@@ -10,7 +10,7 @@ We will create two branches: one for Tessa and one for Kali. We will each work i
 
 # Will you meet phycially or virtually> 
 
-tessa
+Both physically and virtually, depending on how are weekly schedules look like
 
 # How do you communicate? Team chat on Slack? 
 
