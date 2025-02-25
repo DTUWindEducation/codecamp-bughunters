@@ -15,5 +15,3 @@ Both physically and virtually, depending on how are weekly schedules look like
 # How do you communicate? Team chat on Slack? 
 
 WhatsApp.
-
-# Test by Benni
