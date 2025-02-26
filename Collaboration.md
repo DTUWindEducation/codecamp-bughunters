@@ -6,7 +6,7 @@ We will meet everyweek after class, to discuss week per week how we will work. W
 
 # Branches off main? Who reviews pull requests? 
 
-We will create two branches: one for Tessa and one for Kali. We will each work in our own branches and push to the main from there. Since we are only two, the other person (whoever did not push) will accept the pull request. 
+We will create 3 branches: one for Tessa and one for Kali and one for Benni. We will each work in our own branches and push to the main from there. Since we are only two, the other person (whoever did not push) will accept the pull request. 
 
 # Will you meet phycially or virtually> 
 
