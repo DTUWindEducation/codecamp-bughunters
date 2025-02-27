@@ -20,7 +20,7 @@ def load_wind(path_wind,t_start=0):
     t_wind,u_wind = np.hsplit(data,2)
     return t_wind, u_wind
 
-#np.load wants to load everything as a single data type
+
 def load_turbie_parameters(path_parameters):
     data= np.loadtxt(path_parameters, dtype=str, skiprows=1) #load data as string (both numerical values and strings)
     values, keys = np.hsplit(data, [1]) #values get first column, keys get all remaining columns
