@@ -126,8 +126,33 @@ def calculate_dydt(t,y,M,C,K,rho=None,ct=None,rotor_area=None,t_wind=None,u_wind
         return A@y+B 
 
 
-# def simulate_turbie(path_wind,path_parameters,path_Ct):
-#     t_span = (0,600)
-#     initial_conds = np.array(0,0,0,0)
-#     solve = solve_ivp(calculate_dydt,t_span,initial_conds)
-#     return t,u_wind,x_b,x_t
+def simulate_turbie(path_wind,path_parameters,path_Ct):
+    # define our time vector
+    t0, tf, dt = 0, 660, 0.01
+
+    # inputs to solve ivp
+    tspan = [t0, tf]  # 2-element list of start, stop
+    y0 = [0, 0, 0, 0]  # initial condition
+    t_eval = np.arange(t0, tf, dt)  # times at which we want output
+
+    M,C,K = get_turbie_system_matrices(path_parameters)
+    args = (M, C, K, ct, rho, area, t_wind, wind)  # extra arguments to dydt besides t, y
+
+    # run the numerical solver
+    res = solve_ivp(calculate_dydt, tspan, y0, t_eval=t_eval, args=args)
+
+    # extract the output
+    t, y = res.t, res.y
+
+    return t, y
+
+DATA_DIR = Path('./data')
+path_wind_file = DATA_DIR / 'wind_12_ms_TI_0.1.txt'
+path_param_file = DATA_DIR / 'turbie_parameters.txt'
+path_ct_file = DATA_DIR / 'CT.txt'
+path_resp_file = DATA_DIR / 'resp_12_ms_TI_0.1.txt'
+t_exp, u_exp, xb_exp, xt_exp = load_resp(path_resp_file, t_start=0)
+_, u_wind = load_wind(path_wind_file, t_start=0)
+
+print(simulate_turbie(path_wind_file, path_param_file, path_ct_file))
+#print(np.shape(t),np.shape(u2))
