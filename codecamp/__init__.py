@@ -1,8 +1,8 @@
 """Turbie functions.
 """
-import numpy as np
 from pathlib import Path
-
+from scipy.integrate import solve_ivp
+import numpy as np
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -72,3 +72,8 @@ def get_turbie_system_matrices(path_parameters):
 
     return M, C, K
 
+def simulate_turbie(path_wind,path_parameters,path_Ct):
+    t_span = (0,600)
+    initial_conds = np.array(0,0,0,0)
+    solve = solve_ivp(calculate_dydt,t_span,initial_conds)
+    return t,u_wind,x_b,x_t
