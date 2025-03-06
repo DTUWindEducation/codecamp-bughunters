@@ -158,3 +158,8 @@ def simulate_turbie(path_wind,path_parameters,path_Ct):
     
     return t, u_wind, xb, xt
 
+def save_resp(t,u,xb,xt,path_save):
+    header="Time \tU \txb \txt"
+    data =np.column_stack((t,u,xb,xt)) #stacks 1D arrays as columns into 2D array
+    np.savetxt(path_save, data, delimiter='\t', fmt='%.3f', header=header)
+
