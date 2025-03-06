@@ -1,10 +1,3 @@
-
-"""Turbie functions.
-"""
-from pathlib import Path
-from scipy.integrate import solve_ivp
-import numpy as np
-
 """Turbie functions."""
 import numpy as np
 from pathlib import Path
@@ -26,6 +19,7 @@ def load_wind(path_wind,t_start=0):
     data = data[data[:,0]>=t_start] 
     #t_wind,u_wind = np.hsplit(data,2)
     t_wind, u_wind = data.T
+    return t_wind, u_wind
 
 
 
