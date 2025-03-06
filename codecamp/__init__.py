@@ -10,14 +10,16 @@ import numpy as np
 def load_resp(path_resp,t_start=60):
     data = np.loadtxt(path_resp,skiprows=1)
     data = data[data[:,0]>=t_start] 
-    t,u,xb,xt = np.hsplit(data,4)
+    #t,u,xb,xt = np.hsplit(data,4)
+    t, u, xb, xt = data.T
     return t, u, xb, xt
 
 
 def load_wind(path_wind,t_start=0):
     data = np.loadtxt(path_wind,skiprows=1)
     data = data[data[:,0]>=t_start] 
-    t_wind,u_wind = np.hsplit(data,2)
+    #t_wind,u_wind = np.hsplit(data,2)
+    t_wind, u_wind = data.T
     return t_wind, u_wind
 
 
@@ -109,8 +111,8 @@ def calculate_dydt(t,y,M,C,K,rho=None,ct=None,rotor_area=None,t_wind=None,u_wind
         v1=y[2]
 
         # ensuring that t_wind and u_wind are 1-D arrays 
-        t_wind = t_wind[:,0]
-        u_wind = u_wind[:,0]
+        # t_wind = t_wind[:,:]
+        # u_wind = u_wind[:,]
 
         #interpolation for windspeed at time t (if t is between two values, it interpolates linearly between u_wind values)
         u_t=np.interp(t,t_wind, u_wind)
@@ -136,23 +138,23 @@ def simulate_turbie(path_wind,path_parameters,path_Ct):
     t_eval = np.arange(t0, tf, dt)  # times at which we want output
 
     M,C,K = get_turbie_system_matrices(path_parameters)
-    args = (M, C, K, ct, rho, area, t_wind, wind)  # extra arguments to dydt besides t, y
+    t_wind, u_wind = load_wind(path_wind)
+    turbie_params = load_turbie_parameters(path_parameters)
+    rho = turbie_params['rho']
+    area = np.pi * (turbie_params['Dr']/2)**2
+    ct = calculate_ct(u_wind,path_Ct)
 
+    args = (M, C, K, ct, rho, area, t_wind, u_wind)  # extra arguments to dydt besides t, y
     # run the numerical solver
-    res = solve_ivp(calculate_dydt, tspan, y0, t_eval=t_eval, args=args)
+    res = solve_ivp(calculate_dydt, tspan, y0, t_eval=t_wind, args=args)
 
     # extract the output
     t, y = res.t, res.y
 
-    return t, y
+    # get out relative deflections
+    xb = y[0] - y[1]  # relative blade deflection
+    xt = y[1]  # tower deflection
+    t = t
+    
+    return t, u_wind, xb, xt
 
-DATA_DIR = Path('./data')
-path_wind_file = DATA_DIR / 'wind_12_ms_TI_0.1.txt'
-path_param_file = DATA_DIR / 'turbie_parameters.txt'
-path_ct_file = DATA_DIR / 'CT.txt'
-path_resp_file = DATA_DIR / 'resp_12_ms_TI_0.1.txt'
-t_exp, u_exp, xb_exp, xt_exp = load_resp(path_resp_file, t_start=0)
-_, u_wind = load_wind(path_wind_file, t_start=0)
-
-print(simulate_turbie(path_wind_file, path_param_file, path_ct_file))
-#print(np.shape(t),np.shape(u2))
