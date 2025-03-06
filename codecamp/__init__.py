@@ -1,19 +1,26 @@
 """Turbie functions."""
 import numpy as np
 from pathlib import Path
+from scipy.integrate import solve_ivp
+import numpy as np
 import matplotlib.pyplot as plt
 
-def load_resp(path_resp, t_start=60):
-    data = np.loadtxt(str(path_resp), skiprows=1)
-    data = data[data[:, 0] >= t_start]
-    t, u, xb, xt = np.hsplit(data, 4)
+
+def load_resp(path_resp,t_start=60):
+    data = np.loadtxt(path_resp,skiprows=1)
+    data = data[data[:,0]>=t_start] 
+    #t,u,xb,xt = np.hsplit(data,4)
+    t, u, xb, xt = data.T
     return t, u, xb, xt
 
-def load_wind(path_wind, t_start=0):
-    data = np.loadtxt(str(path_wind), skiprows=1)
-    data = data[data[:, 0] >= t_start]
-    t_wind, u_wind = np.hsplit(data, 2)
+
+def load_wind(path_wind,t_start=0):
+    data = np.loadtxt(path_wind,skiprows=1)
+    data = data[data[:,0]>=t_start] 
+    #t_wind,u_wind = np.hsplit(data,2)
+    t_wind, u_wind = data.T
     return t_wind, u_wind
+
 
 
 # Part 2: Plot response data
@@ -99,4 +106,93 @@ def get_turbie_system_matrices(path_parameters):
     ])
 
     return M, C, K
+
+def calculate_ct(u_wind, path_ct): 
+    data = np.loadtxt(path_ct,skiprows=1)
+    mean_u = np.mean(u_wind)
+    V = data[:,0]
+    CT = data[:,1]
+    ct = np.interp(mean_u,V,CT)
+    return ct
+
+def calculate_dydt(t,y,M,C,K,rho=None,ct=None,rotor_area=None,t_wind=None,u_wind=None):
+#assemble matrix A =[   O          I
+#                    -inV(M)K -inv(M)C] for O and I we have the degrees of freedom  
+    #needed for first part: (without force)
+
+    #Define Minv (inverse of matrix M)
+    Minv=np.linalg.inv(M)
+    #degrees of freedom =2
+    ndof=2
+    #Define O and I
+    I= np.eye(ndof)  #eye=identity matrix 2x2
+    O=np.zeros((ndof,ndof)) #zeros= zeros matrix 2x2
+    A = np.block([[O, I], [-Minv @ K, -Minv @ C]]) #A matrix
+    
+    if u_wind is None: #if there is no forcing 
+        return A@y
+    
+    else: #if u_wind is given there is an external force due to wind (Forced response)
+         #ensure parameters are provided
+        if rho is None or ct is None or rotor_area is None or t_wind is None:
+            raise ValueError(f"rho,ct,rotor_area and t_wind must be provided for forced response")
+        
+        #needed for second part: (with force)
+        #assemble B matrix = [   0
+        #                     inv(M)*F]
+        #2 degrees of freedom: x1= displacement of blade, x2= displacement of tower, x1*= velocity of blade, x2*=velocity of tower
+        v1=y[2]
+
+        # ensuring that t_wind and u_wind are 1-D arrays 
+        # t_wind = t_wind[:,:]
+        # u_wind = u_wind[:,]
+
+        #interpolation for windspeed at time t (if t is between two values, it interpolates linearly between u_wind values)
+        u_t=np.interp(t,t_wind, u_wind)
+        #calculate forced response
+        f_aero= 0.5*rho*ct*rotor_area*(u_t-v1)*np.abs(u_t-v1)
+        F=np.zeros(ndof) #areodynamic force on blades, 0=no external forces on system
+        F[0]=f_aero
+        B = np.zeros(2*ndof)  # initialize the array
+        B[ndof:] = Minv @ F
+        shapeAY = np.shape(A@y)
+        shapeB = np.shape(B)
+        
+        return A@y+B 
+
+
+def simulate_turbie(path_wind,path_parameters,path_Ct):
+    # define our time vector
+    t0, tf, dt = 0, 660, 0.01
+
+    # inputs to solve ivp
+    tspan = [t0, tf]  # 2-element list of start, stop
+    y0 = [0, 0, 0, 0]  # initial condition
+    t_eval = np.arange(t0, tf, dt)  # times at which we want output
+
+    M,C,K = get_turbie_system_matrices(path_parameters)
+    t_wind, u_wind = load_wind(path_wind)
+    turbie_params = load_turbie_parameters(path_parameters)
+    rho = turbie_params['rho']
+    area = np.pi * (turbie_params['Dr']/2)**2
+    ct = calculate_ct(u_wind,path_Ct)
+
+    args = (M, C, K, ct, rho, area, t_wind, u_wind)  # extra arguments to dydt besides t, y
+    # run the numerical solver
+    res = solve_ivp(calculate_dydt, tspan, y0, t_eval=t_wind, args=args)
+
+    # extract the output
+    t, y = res.t, res.y
+
+    # get out relative deflections
+    xb = y[0] - y[1]  # relative blade deflection
+    xt = y[1]  # tower deflection
+    t = t
+    
+    return t, u_wind, xb, xt
+
+def save_resp(t,u,xb,xt,path_save):
+    header="Time \tU \txb \txt"
+    data =np.column_stack((t,u,xb,xt)) #stacks 1D arrays as columns into 2D array
+    np.savetxt(path_save, data, delimiter='\t', fmt='%.3f', header=header)
 
