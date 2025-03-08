@@ -23,7 +23,7 @@ def load_wind(path_wind,t_start=0):
 
 
 
-# Part 2: Plot response data
+# Part 3: Plot response data
 def plot_resp(t, u, xb, xt, xlim=(60, 660)):
     """
     Plots the response data with two subplots:
@@ -37,6 +37,7 @@ def plot_resp(t, u, xb, xt, xlim=(60, 660)):
     axs[0].set_ylabel("Wind Speed (m/s)")
     axs[0].legend()
     axs[0].grid(True)
+    axs[0]
 
     # Bottom subplot: Blade & Tower Deflections
     axs[1].plot(t, xb, label="Blade Deflection", color="r")
@@ -53,6 +54,7 @@ def plot_resp(t, u, xb, xt, xlim=(60, 660)):
     # Improve layout and show plot
     fig.tight_layout()
     plt.show()
+    axs = tuple(axs)
 
     return fig, axs
 
@@ -135,7 +137,7 @@ def calculate_dydt(t,y,M,C,K,rho=None,ct=None,rotor_area=None,t_wind=None,u_wind
     else: #if u_wind is given there is an external force due to wind (Forced response)
          #ensure parameters are provided
         if rho is None or ct is None or rotor_area is None or t_wind is None:
-            raise ValueError(f"rho,ct,rotor_area and t_wind must be provided for forced response")
+            raise ValueError(f"rho, ct, rotor_area and t_wind must be provided for forced response")
         
         #needed for second part: (with force)
         #assemble B matrix = [   0
