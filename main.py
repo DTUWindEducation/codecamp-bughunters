@@ -87,10 +87,46 @@ tower_mean_stdv_TI_01 = np.array(tower_data_TI_01)
 #       reference link (https://stackoverflow.com/questions/22481854/plot-mean-and-standard-deviation)
 #   the figures should have the wind speed on the x axis (ex: 1, 2, 3, 4,.... [m/s])
 
+# --- Step 3: Plotting ---
+
+import matplotlib.pyplot as plt
+
+wind_speeds = blade_mean_stdv_TI_01[:, 0]
+
+# Plot Blade Deflections
+plt.figure(figsize=(10, 5))
+plt.errorbar(wind_speeds, blade_mean_stdv_TI_01[:, 1], yerr=blade_mean_stdv_TI_01[:, 2], fmt='o-', label='Blade Deflection')
+plt.xlabel('Wind Speed [m/s]')
+plt.ylabel('Blade Deflection [m]')
+plt.title('Mean and Standard Deviation of Blade Deflection vs Wind Speed (TI = 0.1)')
+plt.legend()
+plt.grid()
+plt.show(block=False)
+
+# Plot Tower Deflections
+plt.figure(figsize=(10, 5))
+plt.errorbar(wind_speeds, tower_mean_stdv_TI_01[:, 1], yerr=tower_mean_stdv_TI_01[:, 2], fmt='s-', color='r', label='Tower Deflection')
+plt.xlabel('Wind Speed [m/s]')
+plt.ylabel('Tower Deflection [m]')
+plt.title('Mean and Standard Deviation of Tower Deflection vs Wind Speed (TI = 0.1)')
+plt.legend()
+plt.grid()
+plt.show(block=False)
+
+# Allow time for plots to be displayed
+plt.pause(0.1)  # Small pause to ensure figures update
+
 # recording time at end of code
 end_time = datetime.now()
 
 # printing execution time to verify running in under 10 mins 
 print('Run time: {}'.format(end_time - start_time))
+
+print("The script is running empty loops to keep plots open")
+input("Press Enter to exit...")  # Keeps plots open until user presses Enter
+
+# Keep script running without forcing user to close plots
+# while True:
+   # plt.pause(1)  # Keeps GUI active without blocking execution
 
 
