@@ -210,7 +210,7 @@ def calculate_mean_stdv(xb,xt,u_wind):
     return mean_blade, std_blade, mean_tower, std_tower, mean_wind
 
 def calculate_for_TI(path_wind_files,path_ct,turbie_params):
-    # initalize two empty arrays (blade_mean_stdv and tower_mean_stdv) to be used to store standard deviations and means for each wind speed data set 
+    # initalize two empty lists (blade_mean_stdv and tower_mean_stdv) to be used to store standard deviations and means for each wind speed data set 
     blade_data = []
     tower_data = []
     
