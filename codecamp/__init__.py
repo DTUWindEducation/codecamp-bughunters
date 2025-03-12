@@ -8,17 +8,21 @@ import os
 
 
 def load_resp(path_resp,t_start=60):
+    # load data from text file, skipping first row since it is header info 
     data = np.loadtxt(path_resp,skiprows=1)
+    # selecting the data according to specified start time 
     data = data[data[:,0]>=t_start] 
-    #t,u,xb,xt = np.hsplit(data,4)
+    # returning variables
     t, u, xb, xt = data.T
     return t, u, xb, xt
 
 
 def load_wind(path_wind,t_start=0):
+    # load data from text file, skipping first row since it is header info 
     data = np.loadtxt(path_wind,skiprows=1)
+    # selecting the data according to specified start time
     data = data[data[:,0]>=t_start] 
-    #t_wind,u_wind = np.hsplit(data,2)
+    # returning variables 
     t_wind, u_wind = data.T
     return t_wind, u_wind
 
@@ -111,10 +115,17 @@ def get_turbie_system_matrices(path_parameters):
     return M, C, K
 
 def calculate_ct(u_wind, path_ct): 
+    # load text file that contains data, skip first row since it is header info 
     data = np.loadtxt(path_ct,skiprows=1)
+
+    # find mean value of wind 
     mean_u = np.mean(u_wind)
+
+    # assign the wind speed and ct values from data to individual variables
     V = data[:,0]
     CT = data[:,1]
+
+    # interpolate to find ct for the given wind file 
     ct = np.interp(mean_u,V,CT)
     return ct
 
@@ -173,11 +184,16 @@ def simulate_turbie(path_wind,path_parameters,path_Ct):
     y0 = [0, 0, 0, 0]  # initial condition
     t_eval = np.arange(t0, tf, dt)  # times at which we want output
 
+    # call functions to get necessary arguments used for solve_ivp
     M,C,K = get_turbie_system_matrices(path_parameters)
     t_wind, u_wind = load_wind(path_wind)
     turbie_params = load_turbie_parameters(path_parameters)
+
+    # specify value of rho and area
     rho = turbie_params['rho']
     area = np.pi * (turbie_params['Dr']/2)**2
+
+    # find ct value 
     ct = calculate_ct(u_wind,path_Ct)
 
     args = (M, C, K, ct, rho, area, t_wind, u_wind)  # extra arguments to dydt besides t, y
@@ -190,22 +206,32 @@ def simulate_turbie(path_wind,path_parameters,path_Ct):
     # get out relative deflections
     xb = y[0] - y[1]  # relative blade deflection
     xt = y[1]  # tower deflection
-    t = t
+    t = t       # time 
     
     return t, u_wind, xb, xt
 
 def save_resp(t,u,xb,xt,path_save):
+    # specify header to contain the associated labels for each column
     header="Time \tU \txb \txt"
-    data =np.column_stack((t,u,xb,xt)) #stacks 1D arrays as columns into 2D array
+
+    #stacks 1D arrays as columns into 2D array
+    data =np.column_stack((t,u,xb,xt)) 
+
+    # saves data as a text file to the location specified by path_save 
     np.savetxt(path_save, data, delimiter='\t', fmt='%.3f', header=header)
 
 def calculate_mean_stdv(xb,xt,u_wind): 
+    # use numpy to find mean of the xb array
     mean_blade = np.mean(xb)
+    # use numpy to find stdv of the xb array
     std_blade = np.std(xb)
 
+    # use numpy to find mean of the xt array 
     mean_tower = np.mean(xt)
+    # use numpy to find the stdv of the xt array 
     std_tower = np.std(xt)
 
+    # use numpy to find the mean of the wind speed 
     mean_wind = np.mean(u_wind)
     return mean_blade, std_blade, mean_tower, std_tower, mean_wind
 
@@ -228,6 +254,7 @@ def calculate_for_TI(path_wind_files,path_ct,turbie_params):
         #  calculate the mean and standard deviation of the blade using calculate_mean_stdv function
         mean_blade, std_blade, mean_tower, std_tower, mean_wind = calculate_mean_stdv(xb,xt,wind)
 
+        # append the mean and stdv values previously calculated to the list in order to store the mean and stdv associated with each wind speed 
         blade_data.append([mean_wind,mean_blade,std_blade])
         tower_data.append([mean_wind,mean_tower, std_tower])
 
@@ -235,11 +262,17 @@ def calculate_for_TI(path_wind_files,path_ct,turbie_params):
 
 
 def plot_mean_stdv(blade_array, tower_array, TI_title = str): 
+    # specifying subplots and figure size 
     fig, axs = plt.subplots(2, 1, figsize=(12, 6))
+    # using error bar to plot the stdv in relation to each mean blade deflection value 
     axs[0].errorbar(blade_array[:,0], blade_array[:, 1], yerr=blade_array[:, 2], fmt='o-', capsize=2, label='Blade Deflection')
+    # set x label
     axs[0].set_xlabel('Mean Wind Speed [m/s]')
+    # set y label
     axs[0].set_ylabel('Blade Deflection [m]')
+    # ensuring all x values are displayed on the x axis 
     axs[0].set_xticks(blade_array[:,0])
+    # setting title to display the title including the TI value for which data is being plotted 
     axs[0].set_title('Blade Deflection vs Mean Wind Speed,' + TI_title)
 
     axs[1].errorbar(tower_array[:,0], tower_array[:, 1], yerr=tower_array[:, 2], fmt='o-', color = 'r', capsize=2, label='Tower Deflection')
