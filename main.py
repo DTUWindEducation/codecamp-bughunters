@@ -11,9 +11,8 @@ import codecamp
 # recording time at start of code 
 start_time = datetime.now()
 
-# pseudocode below: 
-
 # step 1: 
+
 # use load_turbie_parameters to load params
 DATA_DIR = Path('./data')
 TI_01_DIR = Path('./data/wind_TI_0.1')
@@ -43,11 +42,11 @@ tower_mean_stdv_TI_015 = np.array(tower_data_TI_015)
 
 # step 3: calling plotting function to create subplot for blade and tower deflections for TI 0.1
 codecamp.plot_mean_stdv(blade_mean_stdv_TI_01, tower_mean_stdv_TI_01,"TI = 0.1")
-plt.pause(0.1)
+
 codecamp.plot_mean_stdv(blade_mean_stdv_TI_005, tower_mean_stdv_TI_005,"TI = 0.05")
-plt.pause(0.1)
+
 codecamp.plot_mean_stdv(blade_mean_stdv_TI_015, tower_mean_stdv_TI_015,"TI = 0.15")
-plt.pause(0.1)
+
 
 # record end time of code before calling plt.show() since plt.show() keeps the code open until the figure is closed, 
 # but we are interested in if the code produces the figures in under 10 mins 
@@ -59,8 +58,8 @@ print('Run time: {}'.format(end_time - start_time))
 # calling plt.show() to display the figure
 plt.show()
 
-
-input("Press Enter to exit, but the figures will remain open...")
+print("The script is running empty loops to keep plots open")
+input("Press Enter to exit...")  # Keeps plots open until user presses Enter
 
 
 
