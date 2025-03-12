@@ -1,58 +1,52 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/NbRStOuB)
 # Our CodeCamp project
-# Bughunters
+# Bughunters 
 
-(Before submission) Add a brief description here. What does a
-user need to know about this code?  
+The code simulates wind turbine blade and tower deflections based on wind speed variations (from 4 m/s to 25m/s). It calculates the mean and standard deviation of the deflections for different wind speeds and different turbulence intensities (TI= 0.1, 0.05, 0.15). The results are plotted to analyze the turbine's response.
+The project is developed in 2 parts: the main script (main.py) and the function module (codecamp/__init__). The Main Script calls functions to load data, run simulations, compute calculations and generate plots, while the Function Module contains all the functions needed for data processing, turbine simulation and visualization. Three new functions were added to the function module for the last part of the assignment:
+    - calculate_mean_stdv
+    - calculate_for_TI
+    -  plot_mean_stdv
+and these are then used in the main.py
 
-This code uses turbine system parameter and thrust coefficient to model turbine behaviour. The code processes wind speeds from 4m/s to 25m/s and calculates blade and tower deflections. It shows how turbines, and specifically blade and tower deflections, respond to increasing wind speed.
 
 ## Quick-start guide
 - Clone the repository
 - Make sure to have all the python packages installed (numpy, matplotlib, pathlib, scipy, pandas, pytest) 
-- Run main.py and the script will process all wind speed files, compute deflections and generate plots 
+- Ensure that all the files are there (turbie_parameters.txt, CT.txt, wind_TI_o.1/, wind_TI_0.05/, wind_TI_0.15/)
+- Run main.py and the script will process all wind speed files, compute deflections mean and stdv, generate plots and print execution time
 
 ## How the code works
-The code simulates wind turbine blade and tower deflections based on wind speed variations and turbulence instensity. This code includes three major steps: loading the data, processing wind files and generating plots.
+ This project is structured in: 
+ 1) Function module (codecamp/__init__)
+ 2) Main script (main.py)
+
+FUNCTION MODULE
+
+   1. calculate_mean_stdv(xb, xt, u_wind)
+   This function calculates the mean and standard deviation of the blade deflection, tower deflection, and wind speed across the entire dataset. The function takes xb, xt and u_wind NumPy arrays from simulate_turbie() function as an input, and returns mean_blade, stdv_blade, mean_tower, stdv_tower and mean_wind as individual values.
+
+   2. calculate_for_TI(path_wind_files,path_ct, turbie_params):
+   This function first create 2 empy lists where to store the data later. After it retrieves all the .txt files in the wind dataset and sorts it based on wind speed, so that it is in the correct order. It loops then through each wind speed file. For each wind speed file it calls simulate_turbie(), which reads the wind data, loads turbine system parameters and compute M, C, K matrices. It then returns t, wind, xb, xt. It then calls calculate_mean_stdv() to compute mean and stdv of blade and tower deflections, and mean wind speed. It then appends the results into blade_data and tower_data.
+
+   3. plot_mean_stdv(blade_array, tower_array, TI_title)
+   This function creates 2 subplots:
+     - Blade Deflection vs. Wind Speed
+     - Tower Deflection vs. Wind Speed
+   It uses error bars to show standard deviation. The function uses blade and tower array, which come from calculate_for_TI (the lists are first converted into NumPy arrays before calling the function)
 
 
-- STEP 1: Loading Wind and Turbine Data
+MAIN SCRIPT
 
-   - The code first initializes directories and loads required data. 
-       - Wind data files: stored in ./data/wnd_TI_0.1
-       - Turbine Parameters: read from turbie_parameters.txt
-       - CT Curve Data: Read from CT.txt
-   - Initialize storage arrays(blade_data_TI_01, tower_data_TI_01)
-   - Sorting Wind Data: The code reads all files in wind_TI_01, extracts wind speed values from filenames, and sort them numerically by wind speed. This ensures the for loop processes data in increasing wind speed order
+   1. Record start time (to measure how long the entire process takes)
+   2. Load Turbine Parameters, CT curve and wind datasets for TI= 0.1, 0.05, 0.15
+   3. Process each wind speed dataset. For each TI the script calls calculate_for_TI, which reads wind speed files and computes mean and stdv. The function is defined in codecamp/__init__.
+   4. Once calculate_for_TI() returns the data, the code converts these lists to NumPy arrays for plotting.
+   5. Generate plots, by calling the plot_mean_stdv() function 
+   6. Record End Time (to make sure it not exceeds the assignment limit).
 
-
-- STEP 2: Processing Each Wind Speed File (For Loop)
-
-The code loops through each wind speed data file and makes operations to calculate the blade and tower deflections. For each wind speed file in the sorted list:
-   - Extract File Path and Wind Speed
-   assign wind speed value from file. Store the file path for processing.
-   - Load Wind Data
-   Use codecamp.load.wind() to retrieve time series (t_wind) and wind speed (u_wind).
-   - Compute Ct by using codecamp.calculate_ct()
-   - Get Turbine System Matrices(M,C,K)
-   codecamp.get_turbie_system_matrices() load mass, damping and stiffness matrices
-   - Run Turbine Simulation
-   codecamp.simulate_turbie() simulates blade(xb) and tower (xt) deflections
-   - Compute Mean and Standard Deviation for xb and xt
-   - Store results, appending them to the storage arrays
-
-
-- STEP 3: Generating Plots
-
-After processing all wind speeds, the code plots:
-   - Blade Deflection vs. Wind Speed
-   - Tower Deflection vs. Wind SPeed
- 
 
 ## Team contributions
-
-(Before submission) List team members. How did the different team
-members contribute?  
 
 Each team member was assigned specific tasks, but we worked collaboratively throughout the process by reviewing each other's work, providing feedback, and managing pull requests.
 
