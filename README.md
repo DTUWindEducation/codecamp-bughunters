@@ -6,7 +6,7 @@ The code simulates wind turbine blade and tower deflections based on wind speed 
 The project is developed in 2 parts: the main script (main.py) and the function module (codecamp/__init__). The Main Script calls functions to load data, run simulations, compute calculations and generate plots, while the Function Module contains all the functions needed for data processing, turbine simulation and visualization. Three new functions were added to the function module for the last part of the assignment:
     - calculate_mean_stdv
     - calculate_for_TI
-    -  plot_mean_stdv
+    - plot_mean_stdv
 and these are then used in the main.py
 
 
@@ -35,6 +35,30 @@ FUNCTION MODULE
      - Tower Deflection vs. Wind Speed
    It uses error bars to show standard deviation. The function uses blade and tower array, which come from calculate_for_TI (the lists are first converted into NumPy arrays before calling the function)
 
+      **Function Dependencies**: 
+
+      Multiple functions were used to complete this project. A comprehensive list of the functions used for this project can be seen in the image below. This image shows the functions utilized as well as the inputs and outputs of each function. 
+      ![Diagram](./diagram/function_input_output.drawio.png)
+
+      Some of these functions call other functions within the function. This is the case for both the simulate_turbie function and the calculate_for_TI function. 
+   
+      Within the simulate_turbie function, the following functions are called: 
+      - load_turbie_parameters
+      - get_turbie_system_matricies 
+      - load_wind
+      - calculate_ct 
+      - calculate_dydt
+      Additionaly, get_turbie_system_matricies calls to the load_turbie_parameters functions within the function. 
+
+      Within the calculate_for_TI function, the following functions are called: 
+      - simulate_turbie
+      - calculate_mean_stdv
+      
+      A visual representation of functions being called within the simulate_turbie function and the calculate_for_TI function is shown below: 
+
+      ![Diagram](./diagram/function_dependencies.drawio.png)
+
+
 
 MAIN SCRIPT
 
@@ -44,6 +68,11 @@ MAIN SCRIPT
    4. Once calculate_for_TI() returns the data, the code converts these lists to NumPy arrays for plotting.
    5. Generate plots, by calling the plot_mean_stdv() function 
    6. Record End Time (to make sure it not exceeds the assignment limit).
+
+   A visual representation of the methodology described above can be seen below. 
+
+   ![Diagram](./diagram/main_script_diagram.drawio.png)
+
 
 
 ## Team contributions
