@@ -4,6 +4,7 @@ from pathlib import Path
 from scipy.integrate import solve_ivp
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 
 def load_resp(path_resp,t_start=60):
@@ -198,3 +199,53 @@ def save_resp(t,u,xb,xt,path_save):
     data =np.column_stack((t,u,xb,xt)) #stacks 1D arrays as columns into 2D array
     np.savetxt(path_save, data, delimiter='\t', fmt='%.3f', header=header)
 
+def calculate_mean_stdv(xb,xt,u_wind): 
+    mean_blade = np.mean(xb)
+    std_blade = np.std(xb)
+
+    mean_tower = np.mean(xt)
+    std_tower = np.std(xt)
+
+    mean_wind = np.mean(u_wind)
+    return mean_blade, std_blade, mean_tower, std_tower, mean_wind
+
+def calculate_for_TI(path_wind_files,path_ct,turbie_params):
+    # initalize two empty arrays (blade_mean_stdv and tower_mean_stdv) to be used to store standard deviations and means for each wind speed data set 
+    blade_data = []
+    tower_data = []
+    
+    # Get all .txt files in the folder
+    files = [f for f in os.listdir(path_wind_files) if f.endswith('.txt')]
+
+    # Sort the files by extracting the wind speed value (which is the second element when splitting by '_')
+    files.sort(key=lambda x: int(x.split('_')[1]))
+
+    for file_name in files: 
+        path_wind = path_wind_files/(str(file_name))
+        #  call simulate_turbie to get time, wind, and deflections 
+        t, wind, xb, xt = simulate_turbie(path_wind, turbie_params,path_ct)
+
+        #  calculate the mean and standard deviation of the blade using calculate_mean_stdv function
+        mean_blade, std_blade, mean_tower, std_tower, mean_wind = calculate_mean_stdv(xb,xt,wind)
+
+        blade_data.append([mean_wind,mean_blade,std_blade])
+        tower_data.append([mean_wind,mean_tower, std_tower])
+
+    return blade_data, tower_data
+
+
+def plot_mean_stdv(blade_array, tower_array, TI_title = str): 
+    fig, axs = plt.subplots(2, 1, figsize=(12, 6))
+    axs[0].errorbar(blade_array[:,0], blade_array[:, 1], yerr=blade_array[:, 2], fmt='o-', capsize=2, label='Blade Deflection')
+    axs[0].set_xlabel('Mean Wind Speed [m/s]')
+    axs[0].set_ylabel('Blade Deflection [m]')
+    axs[0].set_xticks(blade_array[:,0])
+    axs[0].set_title('Blade Deflection vs Mean Wind Speed,' + TI_title)
+
+    axs[1].errorbar(tower_array[:,0], tower_array[:, 1], yerr=tower_array[:, 2], fmt='o-', color = 'r', capsize=2, label='Tower Deflection')
+    axs[1].set_xlabel('Mean Wind Speed [m/s]')
+    axs[1].set_ylabel('Tower Deflection [m]')
+    axs[1].set_xticks(tower_array[:,0])
+    axs[1].set_title('Tower Deflection vs Mean Wind Speed,'+ TI_title)
+    fig.tight_layout()
+    return fig, axs
