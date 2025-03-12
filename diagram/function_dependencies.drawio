@@ -100,7 +100,7 @@
             <mxPoint x="550" y="245" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="Xd3-F2mCUXiF-xnBqhoO-22" value="get_turbie_system_matricies" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="Xd3-F2mCUXiF-xnBqhoO-22" value="simulate_turbie" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="238.75" y="800" width="165" height="60" as="geometry" />
         </mxCell>
         <mxCell id="Xd3-F2mCUXiF-xnBqhoO-24" value="path_wind_files: str/path&amp;nbsp;&lt;div&gt;path_ct: str/path&lt;/div&gt;&lt;div&gt;turbie_params: str/path&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
