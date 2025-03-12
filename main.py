@@ -12,8 +12,7 @@ import codecamp
 start_time = datetime.now()
 
 # step 1: 
-
-# use load_turbie_parameters to load params
+# load paths for data which will be used in the functions called within the code below 
 DATA_DIR = Path('./data')
 TI_01_DIR = Path('./data/wind_TI_0.1')
 TI_005_DIR = Path('./data/wind_TI_0.05')
