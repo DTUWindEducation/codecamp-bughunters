@@ -81,6 +81,15 @@ def load_turbie_parameters(path_parameters):
 
 
 def get_turbie_system_matrices(path_parameters):
+    """ This function returns the mass, damping and stifness matrices for the turbine system
+    given the path to the parameters file. 
+
+    Parameters:
+    path_parameters (str): Path to parameters file
+
+    Returns:
+    np.ndarray: Mass matrix (M), damping matrix (C) and stifness matrix (K)
+    """
     params= load_turbie_parameters(path_parameters)
 
     # Define mass values
@@ -115,6 +124,15 @@ def get_turbie_system_matrices(path_parameters):
     return M, C, K
 
 def calculate_ct(u_wind, path_ct): 
+    """ This function calculates the thrust coefficient (ct) for a given wind speed.
+
+    Parameters:
+    u_wind(np.ndarray): Wind speed data
+    path_ct(str): Path to the Ct file
+
+    Returns:
+    float: Ct value
+    """
     # load text file that contains data, skip first row since it is header info 
     data = np.loadtxt(path_ct,skiprows=1)
 
@@ -130,7 +148,22 @@ def calculate_ct(u_wind, path_ct):
     return ct
 
 def calculate_dydt(t,y,M,C,K,rho=None,ct=None,rotor_area=None,t_wind=None,u_wind=None):
-#assemble matrix A =[   O          I
+    """ This function calculates the derivative of the state vector y at time t.
+
+    Parameters:
+    t(float): Time
+    y(np.ndarray): State vector
+    M,C,K(np.ndarray): Mass, damping and stiffness matrices
+    rho(float): Air density
+    ct(float): Thrust coefficient
+    rotor_area(float): Rotor area
+    t_wind(np.ndarray): Time for wind speed data
+    u_wind(np.ndarray): Wind speed data
+
+    Returns: 
+    np.ndarray: Derivative of the state vector y at time t (dy/dt)
+    """
+    #assemble matrix A =[   O          I
 #                    -inV(M)K -inv(M)C] for O and I we have the degrees of freedom  
     #needed for first part: (without force)
 
@@ -176,6 +209,19 @@ def calculate_dydt(t,y,M,C,K,rho=None,ct=None,rotor_area=None,t_wind=None,u_wind
 
 
 def simulate_turbie(path_wind,path_parameters,path_Ct):
+    """ This function simulates the response of the turbine system to a given wind speed data.
+
+    Parameters:
+    path_wind(str): Path to wind speed data
+    path_parameters(Str): Path to parameters file
+    path_Ct(str): Path to Ct file
+
+    Returns:
+    np.ndarray: Time vector (t)
+    np.ndarray: Wind speed data (u_wind)
+    np.ndarray: Blade deflection (xb)
+    np.ndarray: Tower deflection (xt)
+    """
     # define our time vector
     t0, tf, dt = 0, 660, 0.01
 
