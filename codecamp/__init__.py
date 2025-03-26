@@ -14,7 +14,8 @@ def load_resp(path_resp, t_start=60):
         t_start (float): Starting time in seconds to include in the data.
 
     Returns:
-        tuple: Arrays for time (t), wind speed (u), blade deflection (xb), and tower deflection (xt).
+        tuple: Arrays for time (t), wind speed (u), blade deflection (xb),
+        and tower deflection (xt).
     """
     # load data from text file, skipping first row since it is header info
     data = np.loadtxt(path_resp, skiprows=1)
@@ -67,7 +68,6 @@ def plot_resp(t, u, xb, xt, xlim=(60, 660)):
     axs[0].set_ylabel("Wind Speed (m/s)")
     axs[0].legend()
     axs[0].grid(True)
-    axs[0]
 
     # Bottom subplot: Blade & Tower Deflections
     axs[1].plot(t, xb, label="Blade Deflection", color="r")
@@ -97,7 +97,8 @@ def load_turbie_parameters(path_parameters):
         path_parameters (str): Path to the parameter file.
 
     Returns:
-        dict: Dictionary mapping parameter names (str) to their corresponding float values.
+        dict: Dictionary mapping parameter names (str) to
+        their corresponding float values.
     """
     # load data as string (both numerical values and strings)
     data = np.loadtxt(path_parameters, dtype=str, skiprows=1)
@@ -122,8 +123,9 @@ def load_turbie_parameters(path_parameters):
 
 def get_turbie_system_matrices(path_parameters):
 
-    """ This function returns the mass, damping and stifness matrices for the turbine system
-    given the path to the parameters file. 
+    """ This function returns the mass, damping and stifness
+    matrices for the turbine system
+    given the path to the parameters file.
 
     Parameters:
     path_parameters (str): Path to parameters file
@@ -131,7 +133,7 @@ def get_turbie_system_matrices(path_parameters):
     Returns:
     np.ndarray: Mass matrix (M), damping matrix (C) and stifness matrix (K)
     """
-    params= load_turbie_parameters(path_parameters)
+    params = load_turbie_parameters(path_parameters)
 
     # Define mass values
     # Mass of 3 blades
@@ -168,7 +170,8 @@ def get_turbie_system_matrices(path_parameters):
 
 
 def calculate_ct(u_wind, path_ct): 
-    """ This function calculates the thrust coefficient (ct) for a given wind speed.
+    """ This function calculates the thrust coefficient (ct)
+    for a given wind speed.
 
     Parameters:
     u_wind(np.ndarray): Wind speed data
@@ -177,8 +180,8 @@ def calculate_ct(u_wind, path_ct):
     Returns:
     float: Ct value
     """
-    # load text file that contains data, skip first row since it is header info 
-    data = np.loadtxt(path_ct,skiprows=1)
+    # load text file that contains data, skip first row since it is header info
+    data = np.loadtxt(path_ct, skiprows=1)
 
     # find mean value of wind
     mean_u = np.mean(u_wind)
@@ -192,8 +195,10 @@ def calculate_ct(u_wind, path_ct):
     return ct
 
 
-def calculate_dydt(t,y,M,C,K,rho=None,ct=None,rotor_area=None,t_wind=None,u_wind=None):
-    """ This function calculates the derivative of the state vector y at time t.
+def calculate_dydt(t, y, M, C, K, rho=None, ct=None,
+                   rotor_area=None, t_wind=None, u_wind=None):
+    """ This function calculates the derivative of
+    the state vector y at time t.
 
     Parameters:
     t(float): Time
@@ -208,50 +213,58 @@ def calculate_dydt(t,y,M,C,K,rho=None,ct=None,rotor_area=None,t_wind=None,u_wind
     Returns: 
     np.ndarray: Derivative of the state vector y at time t (dy/dt)
     """
-    #assemble matrix A =[   O          I
-#                    -inV(M)K -inv(M)C] for O and I we have the degrees of freedom  
-    #needed for first part: (without force)
+    # assemble matrix A =[   O
+    #  -inV(M)K -inv(M)C] for O and I we
+    # have the degrees of freedom
+    # needed for first part: (without force)
 
-    #Define Minv (inverse of matrix M)
-    Minv=np.linalg.inv(M)
-    #degrees of freedom =2
-    ndof=2
-    #Define O and I
-    I= np.eye(ndof)  #eye=identity matrix 2x2
-    O=np.zeros((ndof,ndof)) #zeros= zeros matrix 2x2
-    A = np.block([[O, I], [-Minv @ K, -Minv @ C]]) #A matrix
-    
+    # Define Minv (inverse of matrix M)
+    Minv = np.linalg.inv(M)
+    # degrees of freedom =2
+    ndof = 2
+    # Define O and I
+    I = np.eye(ndof)  # eye=identity matrix 2x2
+    O = np.zeros((ndof, ndof))  # zeros= zeros matrix 2x2
+    A = np.block([[O, I], [-Minv @ K, -Minv @ C]])  # A matrix
+
     if u_wind is None:  # if there is no forcing
         return A@y
-    
-    else:  # if u_wind is given there is an external force due to wind (Forced response)
-          # ensure parameters are provided
+
+    else:  
+        # if u_wind is given there is an external force
+        # due to wind (Forced response)
+        # ensure parameters are provided
         if rho is None or ct is None or rotor_area is None or t_wind is None:
             raise ValueError(f"rho, ct, rotor_area and t_wind must be provided for forced response")
-        
+    
         # needed for second part: (with force)
         # assemble B matrix = [   0
         #                     inv(M)*F]
-        # 2 degrees of freedom: x1= displacement of blade, x2= displacement of tower, x1*= velocity of blade, x2*=velocity of tower
+        # 2 degrees of freedom: x1= displacement of blade,
+        # x2= displacement of tower, x1*= velocity of blade,
+        # x2*=velocity of tower
         v1 = y[2]
 
-        # ensuring that t_wind and u_wind are 1-D arrays 
+        # ensuring that t_wind and u_wind are 1-D arrays
         # t_wind = t_wind[:,:]
         # u_wind = u_wind[:,]
 
-        # interpolation for windspeed at time t (if t is between two values, it interpolates linearly between u_wind values)
+        # interpolation for windspeed at time t (if t is between two values,
+        # it interpolates linearly between u_wind values)
         u_t = np.interp(t, t_wind, u_wind)
         # calculate forced response
         f_aero = 0.5*rho*ct*rotor_area*(u_t-v1)*np.abs(u_t-v1)
-        F = np.zeros(ndof)  # areodynamic force on blades, 0=no external forces on system
+        # areodynamic force on blades, 0=no external forces on system
+        F = np.zeros(ndof)
         F[0] = f_aero
         B = np.zeros(2*ndof)  # initialize the array
         B[ndof:] = Minv @ F
         return A@y+B
 
 
-def simulate_turbie(path_wind,path_parameters,path_Ct):
-    """ This function simulates the response of the turbine system to a given wind speed data.
+def simulate_turbie(path_wind, path_parameters, path_Ct):
+    """ This function simulates the response of the turbine system
+      to a given wind speed data.
 
     Parameters:
     path_wind(str): Path to wind speed data
@@ -270,7 +283,7 @@ def simulate_turbie(path_wind,path_parameters,path_Ct):
     # inputs to solve ivp
     tspan = [t0, tf]  # 2-element list of start, stop
     y0 = [0, 0, 0, 0]  # initial condition
-    t_eval = np.arange(t0, tf, dt)  # times at which we want output
+    # t_eval = np.arange(t0, tf, dt)  # times at which we want output
 
     # call functions to get necessary arguments used for solve_ivp
     M, C, K = get_turbie_system_matrices(path_parameters)
@@ -284,7 +297,8 @@ def simulate_turbie(path_wind,path_parameters,path_Ct):
     # find ct value
     ct = calculate_ct(u_wind, path_Ct)
 
-    args = (M, C, K, ct, rho, area, t_wind, u_wind)  # extra arguments to dydt besides t, y
+    # extra arguments to dydt besides t, y
+    args = (M, C, K, ct, rho, area, t_wind, u_wind)
     # run the numerical solver
     res = solve_ivp(calculate_dydt, tspan, y0, t_eval=t_wind, args=args)
 
@@ -447,7 +461,7 @@ def calculate_for_TI(path_wind_files, path_ct, turbie_params):
         #  call simulate_turbie to get time, wind, and deflections
         t, wind, xb, xt = simulate_turbie(path_wind, turbie_params, path_ct)
 
-        # calculate the mean and standard deviation of the blade 
+        # calculate the mean and standard deviation of the blade
         # using calculate_mean_stdv function
         mean_blade, std_blade, mean_tower, std_tower, mean_wind = calculate_mean_stdv(xb, xt, wind)
 
