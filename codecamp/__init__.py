@@ -295,10 +295,46 @@ def simulate_turbie(path_wind,path_parameters,path_Ct):
     xb = y[0] - y[1]  # relative blade deflection
     xt = y[1]  # tower deflection
     t = t       # time
-    
+
     return t, u_wind, xb, xt
 
+
 def save_resp(t, u, xb, xt, path_save):
+
+    """
+    Saves time, wind speed, blade deflection, and tower
+    deflection data to a text file.
+
+    This function stacks the provided arrays into a two-dimensional
+    array and writes them to a file specified by `path_save` in
+    tab-delimited format. The file includes a header row labeling
+    the columns "Time", "U", "xb", and "xt".
+
+    Parameters
+    ----------
+    t : array
+        Array of time values (e.g., simulation or measurement times).
+    u : array
+        Array of wind speed measurements corresponding to each time value.
+    xb : array
+        Array of blade deflection values corresponding to each time value.
+    xt : array
+        Array of tower deflection values corresponding to each time value.
+    path_save : pathlib.Path or str
+        Destination path where the output text file will be saved.
+
+    Returns
+    -------
+    None
+        The function writes the data to a file but does not return anything.
+
+    Notes
+    -----
+    - The output file is tab-delimited (`\\t`) and has a header line:
+      "Time \\tU \\txb \\txt".
+    - Data are formatted to three decimal places.
+    """
+
     # specify header to contain the associated labels for each column
     header = "Time \tU \txb \txt"
 
@@ -308,7 +344,36 @@ def save_resp(t, u, xb, xt, path_save):
     # saves data as a text file to the location specified by path_save
     np.savetxt(path_save, data, delimiter='\t', fmt='%.3f', header=header)
 
+
 def calculate_mean_stdv(xb, xt, u_wind):
+
+    """
+    Calculates the mean and standard deviation of blade and tower deflections,
+    as well as the associated mean wind speed.
+
+    Parameters
+    ----------
+    xb : array
+        Array of blade deflection data.
+    xt : array
+        Array of tower deflection data.
+    u_wind : array
+        Array of wind speed measurements.
+
+    Returns
+    -------
+    mean_blade : float
+        Mean blade deflection.
+    std_blade : float
+        Standard deviation of blade deflection.
+    mean_tower : float
+        Mean tower deflection.
+    std_tower : float
+        Standard deviation of tower deflection.
+    mean_wind : float
+        Mean wind speed.
+    """
+
     # use numpy to find mean of the xb array
     mean_blade = np.mean(xb)
     # use numpy to find stdv of the xb array
@@ -323,7 +388,49 @@ def calculate_mean_stdv(xb, xt, u_wind):
     mean_wind = np.mean(u_wind)
     return mean_blade, std_blade, mean_tower, std_tower, mean_wind
 
+
 def calculate_for_TI(path_wind_files, path_ct, turbie_params):
+
+    """
+    Calculates and returns the mean and standard deviation of
+    blade and tower deflection for multiple wind speed datasets.
+
+    This function:
+      1. Reads all `.txt` files in the directory specified by
+        `path_wind_files` which each contain data for a specific wind speed.
+      2. Sorts them by the wind speed value specified by each file's name
+         (the second element when splitting the filename by an underscore).
+      3. For each file, calls `simulate_turbie` to obtain time, wind speed,
+         blade deflection, and tower deflection data.
+      4. Uses `calculate_mean_stdv` to compute the mean and standard
+         deviation of both blade and tower deflections.
+      5. Collects and returns these statistics for all files.
+
+    Parameters
+    ----------
+    path_wind_files : pathlib.Path or str
+        Directory containing `.txt` files, each representing
+        a wind speed dataset.Filenames must include the wind speed
+        as the second segment when splitting by underscore (e.g., 'data_12.txt'
+        where 12 is the wind speed).
+    path_ct : pathlib.Path or str
+        Path to a file or directory containing additional parameters needed by
+        the `simulate_turbie` function (e.g., turbine thrust coefficient data).
+    turbie_params : dict or any
+        A dictionary or object holding parameters for the turbine simulation.
+        turbie_params must contain the variable 'rho' and the associated
+        density of air as well as the variable 'Dr' and the associated
+        diameter of the swept area.
+
+    Returns
+    -------
+    blade_data : list of list
+        List of `[mean_wind, mean_blade, std_blade]` for each
+        wind speed dataset.
+    tower_data : list of list
+        List of `[mean_wind, mean_tower, std_tower]` for each
+        wind speed dataset.
+    """
     # initalize two empty lists (blade_mean_stdv and tower_mean_stdv) to be
     # used to store standard deviations and means for each wind speed data set
     blade_data = []
@@ -335,7 +442,6 @@ def calculate_for_TI(path_wind_files, path_ct, turbie_params):
     # Sort the files by extracting the wind speed value
     # (which is the second element when splitting by '_')
     files.sort(key=lambda x: int(x.split('_')[1]))
-
     for file_name in files:
         path_wind = path_wind_files/(str(file_name))
         #  call simulate_turbie to get time, wind, and deflections
@@ -354,6 +460,36 @@ def calculate_for_TI(path_wind_files, path_ct, turbie_params):
 
 
 def plot_mean_stdv(blade_array, tower_array, TI_title=str):
+
+    """
+    Plots the mean deflection and standard deviation for blade
+    and tower data in two subplots.
+
+    Each array should be of shape (N, 3), where:
+      - The first column represents mean wind speed [m/s].
+      - The second column represents mean deflection [m].
+      - The third column represents the standard deviation of the deflection.
+
+    Parameters:
+    ----------
+    blade_array : numpy.ndarray
+        2D array containing blade deflection data (wind speed,
+        mean deflection, standard deviation).
+    tower_array : numpy.ndarray
+        2D array containing tower deflection data (wind speed,
+        mean deflection, standard deviation).
+    TI_title : str, optional
+        A string to identify the turbulence intensity (TI)
+        or any other descriptor to be included in each subplot title.
+
+    Returns:
+    -------
+    fig : matplotlib.figure.Figure
+        The Figure object containing the two subplots.
+    axs : numpy.ndarray
+        An array of Axes objects for the subplots.
+
+    """
     # specifying subplots and figure size
     fig, axs = plt.subplots(2, 1, figsize=(12, 6))
     # using error bar to plot the stdv in relation
