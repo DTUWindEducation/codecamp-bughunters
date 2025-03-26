@@ -5,8 +5,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-
 def load_resp(path_resp, t_start=60):
+    """
+    Load turbine response data from a text file.
+
+    Parameters:
+        path_resp (str): Path to the response data file.
+        t_start (float): Starting time in seconds to include in the data.
+
+    Returns:
+        tuple: Arrays for time (t), wind speed (u), blade deflection (xb), and tower deflection (xt).
+    """
     # load data from text file, skipping first row since it is header info
     data = np.loadtxt(path_resp, skiprows=1)
     # selecting the data according to specified start time
@@ -17,6 +26,16 @@ def load_resp(path_resp, t_start=60):
 
 
 def load_wind(path_wind, t_start=0):
+    """
+    Load wind speed data from a text file.
+
+    Parameters:
+        path_wind (str): Path to the wind data file.
+        t_start (float): Starting time in seconds to include in the data.
+
+    Returns:
+        tuple: Arrays for time (t_wind) and wind speed (u_wind).
+    """
     # load data from text file, skipping first row since it is header info
     data = np.loadtxt(path_wind, skiprows=1)
     # selecting the data according to specified start time
@@ -26,13 +45,20 @@ def load_wind(path_wind, t_start=0):
     return t_wind, u_wind
 
 
-
 # Part 3: Plot response data
 def plot_resp(t, u, xb, xt, xlim=(60, 660)):
     """
-    Plots the response data with two subplots:
-    - Top: Wind speed vs. Time
-    - Bottom: Blade and Tower Deflections vs. Time
+    Plot response data for wind speed, blade deflection, and tower deflection.
+
+    Parameters:
+        t (array): Time values.
+        u (array): Wind speed data.
+        xb (array): Blade deflection data.
+        xt (array): Tower deflection data.
+        xlim (tuple): Limits for x-axis on the plots.
+
+    Returns:
+        tuple: (Figure object, Axes object tuple)
     """
     fig, axs = plt.subplots(2, 1, figsize=(9, 4))
 
@@ -62,7 +88,17 @@ def plot_resp(t, u, xb, xt, xlim=(60, 660)):
 
     return fig, axs
 
+
 def load_turbie_parameters(path_parameters):
+    """
+    Load turbine parameters from a text file into a dictionary.
+
+    Parameters:
+        path_parameters (str): Path to the parameter file.
+
+    Returns:
+        dict: Dictionary mapping parameter names (str) to their corresponding float values.
+    """
     # load data as string (both numerical values and strings)
     data = np.loadtxt(path_parameters, dtype=str, skiprows=1)
     # values get first column, keys get all remaining columns
@@ -82,7 +118,6 @@ def load_turbie_parameters(path_parameters):
 
     turbie_dict = dict(zip(clean_keys, values))
     return turbie_dict
-
 
 
 def get_turbie_system_matrices(path_parameters):
