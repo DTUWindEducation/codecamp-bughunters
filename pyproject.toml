@@ -1,0 +1,23 @@
+# pyproject.toml
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "codecamp"
+version = "0.0.1"
+description = "Package to investigate turbine deflection for codecamp assignment"
+authors = [
+    { name = "Tessa Bruggeling", email = "s243083@dtu.dk" },
+    { name = "Kali Vanderlaan", email = "s242667@dtu.dk" },
+    { name = "Benedikt Pabinger", email = "s242862@dtu.dk" }
+]
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "scipy"
+]
+
+[project.urls]
+Repository = "https://github.com/DTUWindEducation/codecamp-bughunters.git"
