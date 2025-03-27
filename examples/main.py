@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # importing functions
-from codecamp import calculate_for_TI, plot_mean_stdv 
+from codecamp import calculate_for_TI, plot_mean_stdv
 
 # recording time at start of code
 start_time = datetime.now()
@@ -13,13 +13,14 @@ start_time = datetime.now()
 # step 1:
 # load paths for data which will be used in the
 # functions called within the code below
-DATA_DIR = Path('../data')
-TI_01_DIR = Path('../data/wind_TI_0.1')
-TI_005_DIR = Path('../data/wind_TI_0.05')
-TI_015_DIR = Path('../data/wind_TI_0.15')
+FILE_PATH = Path(__file__)      # path to this file
+FILE_DIR = FILE_PATH.parent.parent     # path to main folder 
+DATA_DIR = FILE_DIR / 'data'
+TI_01_DIR = FILE_DIR / 'data/wind_TI_0.1'
+TI_005_DIR = FILE_DIR / 'data/wind_TI_0.05'
+TI_015_DIR = FILE_DIR / 'data/wind_TI_0.15'
 turbie_params = DATA_DIR / 'turbie_parameters.txt'
 path_ct = DATA_DIR/'CT.txt'
-
 
 # step 2:
 # call calculate_for_TI which contains a loop to calculate the stdv
